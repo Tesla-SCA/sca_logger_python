@@ -18,7 +18,7 @@ def handle(event, context):
 	log.debug("This is end of handle")
 ```
 
-#### Configuration
+## Configuration
 
   - **MEMORY_HANDLER_LOG_CAPACITY** (defaults to 1)
      Size of the in memory buffer. The library flushes (puts a record in kinesis) if the capacity is hit
@@ -27,12 +27,19 @@ def handle(event, context):
      Name of the AWS kinesis stream. The application using this library must provide this.
 
 
-#### Tests
+## Tests
 
 ```shell
 docker-compose build test
 docker-compose up test
 ```
 
-#### Implementation Details
+## Package on Pypi
+change the version in setup.py
+```shell
+python setup.py sdist upload -r pypi
+```
+ 
+
+## Implementation Details
 >  Updating up shortly!
