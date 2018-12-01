@@ -68,4 +68,4 @@ python setup.py sdist upload -r pypi
  
 
 ## Implementation Details
->  Updating up shortly!
+>  Updating shortly!
