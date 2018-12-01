@@ -3,7 +3,7 @@
 - A library used to collect all the AWS Lambda execution logs to AWS Kinesis
 - This is ideal for sending logs to third party applications such as splunk rather than using the native less intutive cloudwatch
   ##### Log structure
-	![alt text](https://github.com/Tesla-SCA/sca_logger_python/blob/master/image.png)
+	![logger-kinesis-architecture](https://github.com/Tesla-SCA/sca_logger_python/blob/master/logger.png)
 ## Usage
 
 ```python
