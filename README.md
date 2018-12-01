@@ -4,7 +4,7 @@
 - This is ideal for sending logs to third party applications such as splunk rather than using the native less intutive cloudwatch
 
 #### Log structure
-*[DEBUG] - 2018-12-01 02:27:29,489 - eb4d0cdd-f50f-11e8-8feb-6fda225bd190 - This is end of handle*
+   `[DEBUG] - 2018-12-01 02:27:29,489 - eb4d0cdd-f50f-11e8-8feb-6fda225bd190 - This is end of handle`
 
 #### Log packaging in kinesis
 <img src="https://github.com/Tesla-SCA/sca_logger_python/blob/master/logger.png" width="500" height="450">
