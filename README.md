@@ -5,6 +5,7 @@
   ##### Log structure
 	<img src="https://github.com/Tesla-SCA/sca_logger_python/blob/master/logger.png" width="500" height="450">
 ## Usage
+- Application trying to log
 
 ```python
 import sca_logger
@@ -15,8 +16,27 @@ def handle(event, context):
 	log = sca_logger.logger()
 	log.info("This is info message")
 	log.debug("This is start of handle")
-	# application logic
+		# application logic
 	log.debug("This is end of handle")
+```
+
+- Application consuming the log from kinesis
+
+```python
+import base64
+import gzip
+import io
+
+def reader(kinesis_event):
+	data = kinesis_event['Records'][0]['Data']
+	gzipped_bytes = base64.b64decode(data)
+	bio = io.BytesIO()
+	bio.write(gzipped_bytes)
+	bio.seek(0)
+	with gzip.GzipFile(mode='rb', fileobj=bio) as reader:
+		a = reader.readlines()
+		for rec in a:
+		print(rec.decode('utf-8'))
 ```
 
 ## Configuration
