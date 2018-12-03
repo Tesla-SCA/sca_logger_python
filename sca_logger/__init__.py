@@ -1,4 +1,3 @@
-import atexit
 import functools
 import gzip
 import io
@@ -39,13 +38,19 @@ def logger():
 
 
 def sca_log_decorator(func):
+    logger_func = logger
+
     @functools.wraps(func)
     def handle_wrapper(event, context):
         global _log_group_name, _aws_request_id
         if context.__class__.__name__ == 'LambdaContext':
             _log_group_name = context.log_group_name
             _aws_request_id = context.aws_request_id
-            atexit.register(logging.shutdown)
+            _logger = logger_func()
+            # the atexit hooks are tricky with aws lambda as they have an altered python
+            # thread implementation. So force flush
+            # atexit.register(logging.shutdown)
+            _logger.handlers[0].flush()
         return func(event, context)
 
     return handle_wrapper
