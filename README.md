@@ -1,3 +1,5 @@
+[![PyPI version](https://badge.fury.io/py/sca_logger_python.svg)](https://badge.fury.io/py/sca_logger_python)
+
 # SCA Logger
 
 - A library used to collect all the AWS Lambda execution logs to AWS Kinesis
