@@ -1,3 +1,4 @@
+import atexit
 import functools
 import gzip
 import io
@@ -44,6 +45,7 @@ def sca_log_decorator(func):
         if context.__class__.__name__ == 'LambdaContext':
             _log_group_name = context.log_group_name
             _aws_request_id = context.aws_request_id
+            atexit.register(logging.shutdown)
         return func(event, context)
 
     return handle_wrapper
