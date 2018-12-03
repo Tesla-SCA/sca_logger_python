@@ -1,7 +1,7 @@
-[![PyPI version](https://badge.fury.io/py/sca_logger_python.svg)](https://badge.fury.io/py/sca_logger_python)
 
-# SCA Logger
 
+# SCA Logger [![PyPI version](https://badge.fury.io/py/sca_logger_python.svg)](https://badge.fury.io/py/sca_logger_python)
+ 
 - A library used to collect all the AWS Lambda execution logs to AWS Kinesis
 - This is ideal for sending logs to third party applications such as splunk rather than using the native less intutive cloudwatch
 
