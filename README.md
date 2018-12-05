@@ -48,7 +48,7 @@ def reader(kinesis_event):
 
 ## Configuration
 
-  - **MEMORY_HANDLER_LOG_CAPACITY** (defaults to 1)
+  - **MEMORY_HANDLER_LOG_CAPACITY** (defaults to 40)
      Size of the in memory buffer. The library flushes (puts a record in kinesis) if the capacity is hit
 	 
   - **KINESIS_SCA_LOG_STREAM***
