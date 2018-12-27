@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='sca_logger_python',
-    version='1.3',
+    version='1.4',
     description='Provides a logger client, more specific to work with AWS Lambda and log to Kinesis',
     author='Venkatesh Kara',
     author_email='vkara@tesla.com',

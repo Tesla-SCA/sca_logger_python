@@ -25,3 +25,6 @@ do
     sleep 0.5
     echo ""
 done
+
+echo "********** Executing TestClass: TestReadFromKinesis **********"
+nosetests tests/test_sca_log_decorator.py:TestReadFromKinesis --nologcapture

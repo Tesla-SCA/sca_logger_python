@@ -4,7 +4,7 @@ import logging
 import time
 import unittest
 
-from sca_logger import KINESIS_SCA_LOG_STREAM, SCAMemoryHandler, logger, utils
+from sca_logger import KINESIS_SCA_LOG_STREAM, SCAMemoryHandler, utils, sca_log_decorator
 
 
 class BaseSCATest(unittest.TestCase):
@@ -46,18 +46,31 @@ class BaseSCATest(unittest.TestCase):
         return False
 
     @staticmethod
-    def log_until_warn_helper():
-        my_logger = logger()
+    @sca_log_decorator
+    def lambda_function_simulator_log_till_warn(event, context):
+        """
+            Function simulating the aws lambda's handler. It invokes logger as if a typical
+            application is trying to log.
+            The below helper tries to log 4 times.
+        """
+        my_logger = logging.getLogger()
         my_logger.debug('This is an debug message')
         my_logger.info('This is an info message')
         my_logger.warning('This is an warn message')
         my_logger.info('This is yet another info message')
 
     @staticmethod
-    def log_all_helper():
-        my_logger = logger()
+    @sca_log_decorator
+    def lambda_function_simulator_log_all_levels(event, context):
+        """
+            Function simulating the aws lambda's handler. It invokes logger as if a typical
+            application is trying to log.
+            The below helper tries to log 4 times.
+        """
+        my_logger = logging.getLogger()
         my_logger.debug('This is an debug message')
         my_logger.info('This is an info message')
         my_logger.warning('This is an warn message')
         my_logger.error('This is an error message')
         my_logger.critical('This is an critical message')
+

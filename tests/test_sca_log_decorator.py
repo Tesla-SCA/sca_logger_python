@@ -1,11 +1,11 @@
 import base64
 import gzip
 import io
+import logging
 import os
 import unittest
 from unittest import mock
 
-import sca_logger
 from sca_logger import SCALoggerException, SCAMemoryHandler, sca_log_decorator
 from tests.test_base import BaseSCATest
 
@@ -15,9 +15,9 @@ class LambdaContext:
     aws_request_id = '11e8-ba3f-79a3ec964b93'
 
 
-class TestVkara(unittest.TestCase):
-    def test_demo(self):
-        data = 'H4sIAJHxAVwC/w3KOwqAQAwA0d5T5AAGkuBn11IUL6CVWLgmQUG08P7gwnRv1mHsl2kDBCEOyILEQNJJ20ksqxCzWKqUDlX0mhyZLWBwS9i47iJ1Uo6Ut/m8PsjZo/A6nPujt0HxA6CkzEZiAAAA'
+class TestReadFromKinesis(unittest.TestCase):
+    def test_reading_sca_logger_content_from_kinesis(self):
+        data = 'H4sIAOZOCFwC/4t2cXUKdY/lNDIwtNA1NNI1MA0xMrIytLQytNAzNzKO4kxONU9NNkxJ0k2zABKGhqkWuknmBpa6iaYpJkbGZmZGKakmnCEZmcUKQJSal6KQn6aQkZiXkpPKBQBy0FVQXAAAAA=="'
         foo = base64.b64decode(data)
         bio = io.BytesIO()
         bio.write(foo)
@@ -25,8 +25,8 @@ class TestVkara(unittest.TestCase):
         with gzip.GzipFile(mode='rb', fileobj=bio) as reader:
             a = reader.readlines()
             for rec in a:
-                print(rec.decode('utf-8'))
-        print("v")
+                result = rec.decode('utf-8')
+                self.assertTrue('This is end of handle' in result)
 
 
 class TestSCALogDecorator0(BaseSCATest):
@@ -34,7 +34,7 @@ class TestSCALogDecorator0(BaseSCATest):
     @sca_log_decorator
     def some_handler(event, context):
         try:
-            log = sca_logger.logger()
+            log = logging.getLogger()
             log.info("This is info message")
             log.debug("This is debug message")
             return True
