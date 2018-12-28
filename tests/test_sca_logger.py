@@ -1,8 +1,11 @@
+import logging
 import os
 from unittest import mock
 
-from sca_logger import KINESIS_SCA_LOG_STREAM, SCAMemoryHandler, sca_log_decorator
-from tests.test_base import BaseSCATest
+from nose import tools
+
+from sca_logger import KINESIS_SCA_LOG_STREAM, SCAMemoryHandler
+from tests.test_base import BaseSCATest, BaseSCATestKinesis
 
 
 class LambdaContext:
@@ -10,20 +13,19 @@ class LambdaContext:
     aws_request_id = '11e8-ba3f-79a3ec964b93'
 
 
-class TestSCALogger0(BaseSCATest):
+@tools.istest
+class TestSCALoggerFlush(BaseSCATest):
     def test_logging_produces_no_errors(self):
         self.lambda_function_simulator_log_till_warn({}, LambdaContext())
 
-# *************** Test Flush from Handler *************** *************** ***************
+    # *************** Test Flush from Handler *************** *************** ***************
     # The use of decorator is mandatory for using the sca_logger_python module. This takes care
     # executing the aws lambda handler function, apart from initializing the logger module and
     # a forced flush towards the end, which is the last flush call from a logger (usually triggered
     # by atexit)
     # The below unit tests are terminated before the final 'shutdown' on logger is invoked.
-# # *************** *************** *************** *************** ***************
+    # # *************** *************** *************** *************** ***************
 
-
-class TestSCALogger1(BaseSCATest):
     @mock.patch.object(SCAMemoryHandler, 'upload_to_kinesis')
     def test_logging_flush_at_2_mem_capacity_non_error(self, kinesis):
         """
@@ -37,8 +39,6 @@ class TestSCALogger1(BaseSCATest):
                 self.assertEquals(log.call_count, 3)
         self.assertTrue(kinesis.called)
 
-
-class TestSCALogger2(BaseSCATest):
     def test_logging_flush_at_3_mem_capacity_non_error(self):
         """
             Logging: 4 non-error logs
@@ -51,8 +51,6 @@ class TestSCALogger2(BaseSCATest):
                 self.lambda_function_simulator_log_till_warn({}, LambdaContext())
                 self.assertEquals(log.call_count, 2)
 
-
-class TestSCALogger3(BaseSCATest):
     def test_logging_flush_at_max_mem_capacity_non_error(self):
         """
             Logging: 4 non-error logs
@@ -65,8 +63,6 @@ class TestSCALogger3(BaseSCATest):
                 self.lambda_function_simulator_log_till_warn({}, LambdaContext())
                 self.assertEquals(log.call_count, 1)
 
-
-class TestSCALogger4(BaseSCATest):
     def test_logging_flush_at_max_mem_capacity_error(self):
         """
             Logging: 5 logs including error and critical
@@ -80,11 +76,41 @@ class TestSCALogger4(BaseSCATest):
                 self.lambda_function_simulator_log_all_levels({}, LambdaContext())
                 self.assertEquals(log.call_count, 3)
 
+    @mock.patch.dict(os.environ, {'SCA_LOG_LEVEL': str(logging.INFO)})
+    def test_logging_info_at_unit_capacity(self):
+        # Logging: 4 as log level is set to INFO (logs all except DEBUG)
+        sca_mem_handler = self.mocked_mem_handler_class(1)
+        with mock.patch('sca_logger.SCAMemoryHandler', return_value=sca_mem_handler):
+            with mock.patch.object(sca_mem_handler, 'flush', wraps=sca_mem_handler.flush) as log:
+                self.lambda_function_simulator_log_all_levels({}, LambdaContext())
+                self.assertEquals(log.call_count, 5)
+
+    @mock.patch.dict(os.environ, {'SCA_LOG_LEVEL': str(logging.ERROR)})
+    def test_logging_error_at_unit_capacity(self):
+        # Logging: 3 as log level is set to ERROR (only ERROR, CRITICAL)
+        sca_mem_handler = self.mocked_mem_handler_class(1)
+        with mock.patch('sca_logger.SCAMemoryHandler', return_value=sca_mem_handler):
+            with mock.patch.object(sca_mem_handler, 'flush', wraps=sca_mem_handler.flush) as log:
+                logging.getLogger().setLevel(logging.ERROR)
+                self.lambda_function_simulator_log_all_levels({}, LambdaContext())
+                self.assertEquals(log.call_count, 3)
+
+    @mock.patch.dict(os.environ, {'SCA_LOG_LEVEL': str(logging.CRITICAL)})
+    def test_logging_critical_at_unit_capacity(self):
+        # Logging: 4 as log level is set to CRITICAL (only CRITICAL)
+        sca_mem_handler = self.mocked_mem_handler_class(1)
+        with mock.patch('sca_logger.SCAMemoryHandler', return_value=sca_mem_handler):
+            with mock.patch.object(sca_mem_handler, 'flush', wraps=sca_mem_handler.flush) as log:
+                logging.getLogger().setLevel(logging.ERROR)
+                self.lambda_function_simulator_log_all_levels({}, LambdaContext())
+                self.assertEquals(log.call_count, 2)
+
 
 # # ***************** ************************** *****************
 # # ***************** Test kinesis integration # *****************
 # # ***************** ************************** *****************
-class TestSCALogger5(BaseSCATest):
+@tools.istest
+class TestSCALoggerKinesisIntegration(BaseSCATestKinesis):
     @mock.patch.dict(os.environ, {'MEMORY_HANDLER_LOG_CAPACITY': '1'})
     def test_payloads_are_in_kinesis_expecting_4_puts(self):
         """
@@ -101,8 +127,6 @@ class TestSCALogger5(BaseSCATest):
         record_response = self.kinesis_client.get_records(ShardIterator=shard_iterator)
         self.assertEquals(len(record_response['Records']), 4)
 
-
-class TestSCALogger6(BaseSCATest):
     @mock.patch.dict(os.environ, {'MEMORY_HANDLER_LOG_CAPACITY': '2'})
     def test_payloads_are_in_kinesis_expecting_2_puts(self):
         """
@@ -119,8 +143,6 @@ class TestSCALogger6(BaseSCATest):
         record_response = self.kinesis_client.get_records(ShardIterator=shard_iterator)
         self.assertEquals(len(record_response['Records']), 2)
 
-
-class TestSCALogger7(BaseSCATest):
     @mock.patch.dict(os.environ, {'MEMORY_HANDLER_LOG_CAPACITY': '10'})
     def test_payloads_are_in_kinesis_expecting_0_puts(self):
         """
@@ -137,8 +159,6 @@ class TestSCALogger7(BaseSCATest):
         record_response = self.kinesis_client.get_records(ShardIterator=shard_iterator)
         self.assertEquals(len(record_response['Records']), 1)
 
-
-class TestSCALogger8(BaseSCATest):
     @mock.patch.dict(os.environ, {'MEMORY_HANDLER_LOG_CAPACITY': '10'})
     def test_payloads_are_in_kinesis_expecting_2_puts_error_logs(self):
         """
@@ -154,3 +174,7 @@ class TestSCALogger8(BaseSCATest):
         shard_iterator = shard_iterator['ShardIterator']
         record_response = self.kinesis_client.get_records(ShardIterator=shard_iterator)
         self.assertEquals(len(record_response['Records']), 2)
+
+
+
+

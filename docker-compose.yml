@@ -17,9 +17,10 @@ services:
       LOCALSTACK_KINESIS_HOST: kinesis
       USE_LOCALSTACK: "True"
       LOCALSTACK_KINESIS_PORT: 5000
+      KINESIS_SCA_LOG_STREAM: SCA_LOG_STREAM
     links:
       - kinesis
     volumes:
       - .:/sca_python
     command:
-      bash scripts/nosetest_orchestrator.sh
+      nosetests -sv --nologcapture

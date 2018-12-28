@@ -62,7 +62,7 @@ class SCAMemoryHandler(MemoryHandler):
     def __init__(self, capacity, log_group_name):
         self.log_group_name = log_group_name
         logging.Handler.__init__(self)
-        super().__init__(capacity=capacity, flushLevel=logging.ERROR)
+        super().__init__(capacity=capacity)
 
     def upload_to_kinesis(self, byte_stream):
         kinesis_client.put_record(Data=byte_stream.getvalue(),

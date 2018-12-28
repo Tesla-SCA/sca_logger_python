@@ -6,6 +6,8 @@ import os
 import unittest
 from unittest import mock
 
+from nose import tools
+
 from sca_logger import SCALoggerException, SCAMemoryHandler, sca_log_decorator
 from tests.test_base import BaseSCATest
 
@@ -15,6 +17,7 @@ class LambdaContext:
     aws_request_id = '11e8-ba3f-79a3ec964b93'
 
 
+@tools.istest
 class TestReadFromKinesis(unittest.TestCase):
     def test_reading_sca_logger_content_from_kinesis(self):
         data = 'H4sIAOZOCFwC/4t2cXUKdY/lNDIwtNA1NNI1MA0xMrIytLQytNAzNzKO4kxONU9NNkxJ0k2zABKGhqkWuknmBpa6iaYpJkbGZmZGKakmnCEZmcUKQJSal6KQn6aQkZiXkpPKBQBy0FVQXAAAAA=="'
@@ -29,7 +32,8 @@ class TestReadFromKinesis(unittest.TestCase):
                 self.assertTrue('This is end of handle' in result)
 
 
-class TestSCALogDecorator0(BaseSCATest):
+@tools.istest
+class TestSCALogDecoratorForLambda(BaseSCATest):
     @staticmethod
     @sca_log_decorator
     def some_handler(event, context):
