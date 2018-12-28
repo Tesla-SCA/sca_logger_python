@@ -15,12 +15,12 @@
 - Application trying to log
 
 ```python
-import sca_logger
+import logging
 from sca_logger import sca_log_decorator
 
 @sca_log_decorator
 def handle(event, context):
-	log = sca_logger.logger()
+	log = logging.getLogger()
 	log.info("This is info message")
 	log.debug("This is start of handle")
 		# application logic
