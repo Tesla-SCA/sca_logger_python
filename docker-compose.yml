@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  kinesis:
+    image: localstack/localstack
+    environment:
+      SERVICES: kinesis:5000
+      DEFAULT_REGION: us-west-2
+      AWS_REGION: us-west-2
+      HOSTNAME: localstack-kinesis
+    ports:
+      - "5000:5000"
+
+  test:
+    build: .
+    environment:
+      LOCALSTACK_KINESIS_HOST: kinesis
+      USE_LOCALSTACK: "True"
+      LOCALSTACK_KINESIS_PORT: 5000
+      KINESIS_SCA_LOG_STREAM: SCA_LOG_STREAM
+    links:
+      - kinesis
+    volumes:
+      - .:/sca_python
+    command:
+      nosetests -sv --nologcapture
