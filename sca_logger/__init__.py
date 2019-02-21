@@ -1,3 +1,4 @@
+import datetime
 import functools
 import gzip
 import io
@@ -16,16 +17,22 @@ def logger(aws_request_id, _log_group_name):
     _sca_logger = logging.getLogger()
     _sca_logger.setLevel(logging.DEBUG)
     capacity = int(os.getenv('MEMORY_HANDLER_LOG_CAPACITY', 40))
-    handler = SCAMemoryHandler(capacity=capacity,
-                               log_group_name=_log_group_name)
-    # [INFO]	2018-11-29T20:00:31.828Z	11e8-ba3f-79a3ec964b93	This is info msg
-    formatter = logging.Formatter('[%(levelname)s]\t%(asctime)s.%(msecs)sZ\t%(aws_request_id)s\t%(message)s\n', '%Y-%m-%dT%H:%M:%S')
+    handler = SCAMemoryHandler(capacity=capacity, log_group_name=_log_group_name)
+    # [INFO]	2019-02-21T12:07:13.499506Z	11e8-ba3f-79a3ec964b93	This is an info message
+    formatter = SCAFormatter('[%(levelname)s]\t%(asctime)sZ\t%(aws_request_id)s\t%(message)s\n')
     handler.setFormatter(formatter)
     handler.addFilter(LambdaLoggerFilter(aws_request_id))
     for _handler in _sca_logger.handlers:
         _sca_logger.removeHandler(_handler)
     _sca_logger.addHandler(handler)
     return _sca_logger
+
+
+class SCAFormatter(logging.Formatter):
+    def formatTime(self, record, datefmt=None):
+        timestamp = record.created
+        py_datetime = datetime.datetime.fromtimestamp(timestamp)
+        return py_datetime.isoformat()
 
 
 class LambdaLoggerFilter(logging.Filter):
