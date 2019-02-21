@@ -19,8 +19,7 @@ def logger(aws_request_id, _log_group_name):
     handler = SCAMemoryHandler(capacity=capacity,
                                log_group_name=_log_group_name)
     # [INFO]	2018-11-29T20:00:31.828Z	11e8-ba3f-79a3ec964b93	This is info msg
-
-    formatter = logging.Formatter('[%(levelname)s]\t%(asctime)s.%(msecs)dZ\t%(aws_request_id)s\t%(message)s\n', '%Y-%m-%dT%H:%M:%S')
+    formatter = logging.Formatter('[%(levelname)s]\t%(asctime)s.%(msecs)sZ\t%(aws_request_id)s\t%(message)s\n', '%Y-%m-%dT%H:%M:%S')
     handler.setFormatter(formatter)
     handler.addFilter(LambdaLoggerFilter(aws_request_id))
     for _handler in _sca_logger.handlers:
@@ -78,7 +77,7 @@ class SCAMemoryHandler(MemoryHandler):
                     for record in self.buffer:
                         gz.write(f"{self.format(record)}".encode('utf-8'))
 
-                # # TODO@vkara Remove once the library is tested and stabilized.
+                # TODO@vkara Remove once the library is tested and stabilized.
                 # byte_stream.seek(0)
                 # with gzip.GzipFile(mode='rb', fileobj=byte_stream) as reader:
                 #     a = reader.readlines()

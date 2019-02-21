@@ -1,7 +1,12 @@
+import base64
+import gzip
+import io
 import logging
 import os
+import re
 from unittest import mock
 
+import datetime
 from nose import tools
 
 from sca_logger import KINESIS_SCA_LOG_STREAM, SCAMemoryHandler
@@ -157,6 +162,8 @@ class TestSCALoggerKinesisIntegration(BaseSCATestKinesis):
                                                                 ShardIteratorType='TRIM_HORIZON')
         shard_iterator = shard_iterator['ShardIterator']
         record_response = self.kinesis_client.get_records(ShardIterator=shard_iterator)
+        for record in record_response['Records']:
+            reader(record['Data'])
         self.assertEquals(len(record_response['Records']), 1)
 
     @mock.patch.dict(os.environ, {'MEMORY_HANDLER_LOG_CAPACITY': '10'})
@@ -173,8 +180,18 @@ class TestSCALoggerKinesisIntegration(BaseSCATestKinesis):
                                                                 ShardIteratorType='TRIM_HORIZON')
         shard_iterator = shard_iterator['ShardIterator']
         record_response = self.kinesis_client.get_records(ShardIterator=shard_iterator)
+        # for record in record_response['Records']:
+        #     reader(record['Data'])
+        #     print(datetime.datetime.now().isoformat())
         self.assertEquals(len(record_response['Records']), 2)
 
-
-
-
+#
+# def reader(data):
+#     gzipped_bytes = data
+#     bio = io.BytesIO()
+#     bio.write(gzipped_bytes)
+#     bio.seek(0)
+#     with gzip.GzipFile(mode='rb', fileobj=bio) as reader:
+#         a = reader.readlines()
+#         for rec in a:
+#             print(rec.decode('utf-8'))
