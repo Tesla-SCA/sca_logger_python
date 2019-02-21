@@ -41,7 +41,7 @@ class TestSCALogDecoratorForLambda(BaseSCATest):
             log = logging.getLogger()
             log.info("This is info message")
             log.debug("This is debug message")
-            return True
+            return 'Handler when context is real'
         except SCALoggerException as e:
             print(e)
             return False
@@ -52,5 +52,29 @@ class TestSCALogDecoratorForLambda(BaseSCATest):
         event = {}
         context = LambdaContext()
         response = self.some_handler(event, context)
-        self.assertTrue(response)
+        self.assertEquals(response, 'Handler when context is real')
         self.assertTrue(kinesis.called)
+
+
+@tools.istest
+class TestSCALogDecoratorForLambdaTestMode(BaseSCATest):
+    @staticmethod
+    @sca_log_decorator
+    def some_handler(event, context):
+        try:
+            log = logging.getLogger()
+            log.info("This is info message")
+            log.debug("This is debug message")
+            return "Handler when context is empty"
+        except SCALoggerException as e:
+            print(e)
+            return False
+
+    @mock.patch.dict(os.environ, {'MEMORY_HANDLER_LOG_CAPACITY': '1'})
+    @mock.patch.object(SCAMemoryHandler, 'upload_to_kinesis')
+    def test_decorator(self, kinesis):
+        event = {}
+        context = {}
+        response = self.some_handler(event, context)
+        self.assertEquals(response, 'Handler when context is empty')
+        self.assertFalse(kinesis.called)

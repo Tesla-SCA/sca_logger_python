@@ -50,7 +50,6 @@ def sca_log_decorator(func):
 
     @functools.wraps(func)
     def handle_wrapper(event, context):
-        lambda_execution_response = None
         if context.__class__.__name__ == 'LambdaContext':
             _log_group_name = context.log_group_name
             _aws_request_id = context.aws_request_id
@@ -59,6 +58,8 @@ def sca_log_decorator(func):
             # the atexit hooks are tricky with aws lambda as they have an altered python
             # thread implementation. So force flush to simulate atexit.register(logging.shutdown)
             _logger.handlers[0].flush()
+        else:
+            lambda_execution_response = func(event, context)
         return lambda_execution_response
 
     return handle_wrapper
