@@ -49,6 +49,17 @@ class BaseSCATest(unittest.TestCase):
 
     @staticmethod
     @sca_log_decorator
+    def lambda_function_simulator_log_while_exception(event, context):
+        """
+            Function simulating the aws lambda's handler. It invokes logger as if a typical
+            application is trying to log.
+            The below helper tries to log 4 times.
+        """
+        BaseSCATest.lambda_function_simulator_log_till_warn(event, context)
+        raise Exception("Test exception logging")
+
+    @staticmethod
+    @sca_log_decorator
     def lambda_function_simulator_log_all_levels(event, context):
         """
             Function simulating the aws lambda's handler. It invokes logger as if a typical

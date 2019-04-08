@@ -1,12 +1,9 @@
-import base64
 import gzip
 import io
 import logging
 import os
-import re
 from unittest import mock
 
-import datetime
 from nose import tools
 
 from sca_logger import KINESIS_SCA_LOG_STREAM, SCAMemoryHandler
@@ -16,6 +13,19 @@ from tests.test_base import BaseSCATest, BaseSCATestKinesis
 class LambdaContext:
     log_group_name = 'test_log_group_name'
     aws_request_id = '11e8-ba3f-79a3ec964b93'
+
+
+def kinesis_log_printer(record_response):
+    for record in record_response['Records']:
+        data = record['Data']
+        gzipped_bytes = data
+        bio = io.BytesIO()
+        bio.write(gzipped_bytes)
+        bio.seek(0)
+        with gzip.GzipFile(mode='rb', fileobj=bio) as reader:
+            a = reader.readlines()
+            for rec in a:
+                print(rec.decode('utf-8'))
 
 
 @tools.istest
@@ -180,13 +190,21 @@ class TestSCALoggerKinesisIntegration(BaseSCATestKinesis):
         record_response = self.kinesis_client.get_records(ShardIterator=shard_iterator)
         self.assertEquals(len(record_response['Records']), 2)
 
-#
-# def reader(data):
-#     gzipped_bytes = data
-#     bio = io.BytesIO()
-#     bio.write(gzipped_bytes)
-#     bio.seek(0)
-#     with gzip.GzipFile(mode='rb', fileobj=bio) as reader:
-#         a = reader.readlines()
-#         for rec in a:
-#             print(rec.decode('utf-8'))
+    @mock.patch.dict(os.environ, {'MEMORY_HANDLER_LOG_CAPACITY': '1'})
+    def test_payloads_are_in_kinesis_while_exception_occurs(self):
+        """
+            Logging: 4 non-error logs + one exception
+            Since the buffer size is 1, it must flush each time.
+        """
+        with self.assertRaises(Exception) as e:
+            self.lambda_function_simulator_log_while_exception({'a': 111}, LambdaContext())
+
+        stream = self.kinesis_client.describe_stream(StreamName=KINESIS_SCA_LOG_STREAM)
+        shard_id = stream['StreamDescription']['Shards'][0]['ShardId']
+        shard_iterator = self.kinesis_client.get_shard_iterator(StreamName=KINESIS_SCA_LOG_STREAM,
+                                                                ShardId=shard_id,
+                                                                ShardIteratorType='TRIM_HORIZON')
+        shard_iterator = shard_iterator['ShardIterator']
+        record_response = self.kinesis_client.get_records(ShardIterator=shard_iterator)
+        # kinesis_log_printer(record_response)
+        self.assertEquals(len(record_response['Records']), 5)

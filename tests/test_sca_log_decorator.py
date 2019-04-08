@@ -49,7 +49,7 @@ class TestSCALogDecoratorForLambda(BaseSCATest):
     @mock.patch.dict(os.environ, {'MEMORY_HANDLER_LOG_CAPACITY': '1'})
     @mock.patch.object(SCAMemoryHandler, 'upload_to_kinesis')
     def test_decorator(self, kinesis):
-        event = {}
+        event = {'a': 123, 'b': 222}
         context = LambdaContext()
         response = self.some_handler(event, context)
         self.assertEquals(response, 'Handler when context is real')
@@ -57,9 +57,16 @@ class TestSCALogDecoratorForLambda(BaseSCATest):
 
 
 @tools.istest
-class TestSCALogDecoratorForLambdaTestMode(BaseSCATest):
+class TestSCALogDecoratorForLambdaTestMode(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # Reset all previous contexts and handlers
+        log = logging.getLogger()
+        for handler in log.handlers:
+            log.removeHandler(handler)
+
     @staticmethod
-    @sca_log_decorator
+    @sca_log_decorator(a='Venkz', b='Kara')
     def some_handler(event, context):
         try:
             log = logging.getLogger()
