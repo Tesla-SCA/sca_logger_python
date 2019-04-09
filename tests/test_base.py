@@ -6,7 +6,8 @@ import unittest
 
 from nose import tools
 
-from sca_logger import KINESIS_SCA_LOG_STREAM, SCAMemoryHandler, sca_log_decorator, utils
+from sca_logger import sca_log_decorator, utils, SCAMemoryHandler
+from sca_logger.sca_memory_handler import KINESIS_SCA_LOG_STREAM
 
 
 @tools.nottest

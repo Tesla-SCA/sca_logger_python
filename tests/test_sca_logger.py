@@ -6,7 +6,8 @@ from unittest import mock
 
 from nose import tools
 
-from sca_logger import KINESIS_SCA_LOG_STREAM, SCAMemoryHandler
+from sca_logger import SCAMemoryHandler
+from sca_logger.sca_memory_handler import KINESIS_SCA_LOG_STREAM
 from tests.test_base import BaseSCATest, BaseSCATestKinesis
 
 
@@ -26,6 +27,13 @@ def kinesis_log_printer(record_response):
             a = reader.readlines()
             for rec in a:
                 print(rec.decode('utf-8'))
+
+        # # TODO@vkara Remove once the library is tested and stabilized.
+        # byte_stream.seek(0)
+        # with gzip.GzipFile(mode='rb', fileobj=byte_stream) as reader:
+        #     a = reader.readlines()
+        #     for rec in a:
+        #         print(rec.decode('utf-8'))
 
 
 @tools.istest
@@ -188,6 +196,7 @@ class TestSCALoggerKinesisIntegration(BaseSCATestKinesis):
                                                                 ShardIteratorType='TRIM_HORIZON')
         shard_iterator = shard_iterator['ShardIterator']
         record_response = self.kinesis_client.get_records(ShardIterator=shard_iterator)
+        # kinesis_log_printer(record_response)
         self.assertEquals(len(record_response['Records']), 2)
 
     @mock.patch.dict(os.environ, {'MEMORY_HANDLER_LOG_CAPACITY': '1'})

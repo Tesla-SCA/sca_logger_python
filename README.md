@@ -3,7 +3,7 @@
 # SCA Logger [![PyPI version](https://badge.fury.io/py/sca_logger_python.svg)](https://badge.fury.io/py/sca_logger_python)
  
 - A library used to collect all the AWS Lambda execution logs to AWS Kinesis
-- This is ideal for sending logs to third party applications such as splunk rather than using the native less intutive cloudwatch
+- This is ideal for sending logs to third party applications such as splunk rather than using the native less intuitive cloudwatch
 
 #### Log structure
    `[DEBUG] - 2018-12-01 02:27:29,489 - eb4d0cdd-f50f-11e8-8feb-6fda225bd190 - This is end of handle`
@@ -33,17 +33,19 @@ def handle(event, context):
 import base64
 import gzip
 import io
+import json
 
 def reader(kinesis_event):
-	data = kinesis_event['Records'][0]['Data']
-	gzipped_bytes = base64.b64decode(data)
-	bio = io.BytesIO()
-	bio.write(gzipped_bytes)
-	bio.seek(0)
-	with gzip.GzipFile(mode='rb', fileobj=bio) as reader:
-		a = reader.readlines()
-		for rec in a:
-		print(rec.decode('utf-8'))
+    data = kinesis_event['Records'][0]['Data']
+    gzipped_bytes = base64.b64decode(data)
+    bio = io.BytesIO()
+    bio.write(gzipped_bytes)
+    bio.seek(0)
+    with gzip.GzipFile(mode='rb', fileobj=bio) as gz_reader:
+        byte_data = gz_reader.read()
+    records = json.loads(byte_data.decode("utf-8"))
+    for record in records:
+        print(record)
 ```
 
 ## Configuration

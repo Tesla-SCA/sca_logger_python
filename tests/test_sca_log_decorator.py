@@ -8,7 +8,7 @@ from unittest import mock
 
 from nose import tools
 
-from sca_logger import SCALoggerException, SCAMemoryHandler, sca_log_decorator
+from sca_logger import SCALoggerException, sca_log_decorator, SCAMemoryHandler
 from tests.test_base import BaseSCATest
 
 
@@ -66,7 +66,7 @@ class TestSCALogDecoratorForLambdaTestMode(unittest.TestCase):
             log.removeHandler(handler)
 
     @staticmethod
-    @sca_log_decorator(a='Venkz', b='Kara')
+    @sca_log_decorator(a='bar', b='foo')
     def some_handler(event, context):
         try:
             log = logging.getLogger()
