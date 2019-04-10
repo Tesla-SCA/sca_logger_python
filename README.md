@@ -5,8 +5,27 @@
 - A library used to collect all the AWS Lambda execution logs to AWS Kinesis
 - This is ideal for sending logs to third party applications such as splunk rather than using the native less intuitive cloudwatch
 
-#### Log structure
+#### Supported Log structures
+   - String
    `[DEBUG] - 2018-12-01 02:27:29,489 - eb4d0cdd-f50f-11e8-8feb-6fda225bd190 - This is end of handle`
+   
+   - JSON
+   ```json
+   {
+	   "asctime":"2019-04-09T22:32:49.250056",
+	   "aws_request_id":"9711b10a-e4b6-4be3-b5ed-0849fcd087ec",
+	   "event":{
+	      "key1":"value1",
+	      "key2":"value2",
+	      "key3":"value3"
+	   },
+	   "filename":"handler.py",
+	   "funcName":"handle",
+	   "levelname":"DEBUG",
+	   "message":"[DEBUG]\t2019-04-09T22:32:49.250056Z\t9711b10a-e4b6-4be3-b5ed-0849fcd087ec\tThis is end of handle\n"
+   }
+   ```
+   
 
 #### Log packaging in kinesis
 <img src="https://github.com/Tesla-SCA/sca_logger_python/blob/master/image.png" width="500" height="450">
@@ -17,8 +36,8 @@
 ```python
 import logging
 from sca_logger import sca_log_decorator
-
-@sca_log_decorator
+ 
+@sca_log_decorator(log_as_json=True, log_event=False)
 def handle(event, context):
 	log = logging.getLogger()
 	log.info("This is info message")
