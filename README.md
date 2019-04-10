@@ -55,6 +55,11 @@ def reader(kinesis_event):
 	 
   - **KINESIS_SCA_LOG_STREAM***
      Name of the AWS kinesis stream. The application using this library must provide this.
+     
+  - **JSON Logging***
+     The ```python @sca_log_decorator``` accepts the following arguments.
+     - ```python log_as_json: bool ``` True logs as json. False logs as str. Default is set to True
+     - ```python log_event: bool ``` True logs the complete event. False does not log anything in event. Default is set to True
 
 
 ## Tests
